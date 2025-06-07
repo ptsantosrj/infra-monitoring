@@ -25,12 +25,23 @@ Este projeto entrega uma stack completa de **monitoramento e observabilidade**, 
 
 > Pré-requisitos: Docker e Docker Compose instalados.
 
-```bash
+```
+*Clone o repositorio
+bash
 git clone https://github.com/seuusuario/infra-monitoring.git
 cd infra-monitoring
+
+*Configure o arquivo `.env` com os dados do banco MySQL gerenciado no Azure:
+cp .env.example .env
+
+*Edite `.env` e insira:
+- Host do banco (ex: `meubanco.mysql.database.azure.com`)
+- Usuário/senha
+- Nome do banco (ex: `zabbix`)
+
+*Suba a stack:
 docker-compose up -d
 ```
-
 ---
 
 ## 🌐 Acesso aos Serviços
@@ -52,9 +63,12 @@ docker-compose up -d
 
 ```
 infra-monitoring/
+├── .env.example
 ├── docker-compose.yml
 ├── prometheus/
-│   └── prometheus.yml
+│   ├── prometheus.yml
+│   ├── alert.rules.yml
+│   └── alertmanager.yml
 ├── grafana/
 │   └── provisioning/
 │       └── datasources/

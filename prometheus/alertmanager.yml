@@ -1,10 +1,16 @@
 global:
   resolve_timeout: 5m
+  smtp_smarthost: 'smtp.gmail.com:587'
+  smtp_from: 'email@gmail.com'
+  smtp_auth_username: 'email@gmail.com'
+  smtp_auth_password: 'senha'
+  smtp_require_tls: true
 
 route:
-  receiver: 'default'
+  receiver: 'gmail-alerts'
 
 receivers:
-  - name: 'default'
+  - name: 'gmail-alerts'
     email_configs:
-      - to: 'you@example.com'
+      - to: 'destinatario@gmail.com'
+        send_resolved: true

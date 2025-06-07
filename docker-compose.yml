@@ -23,7 +23,9 @@ services:
       - "9093:9093"
 
   grafana:
-    image: grafana/grafana-oss
+    build:
+      context: .
+      dockerfile: Dockerfile.grafana
     environment:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=admin
@@ -31,6 +33,7 @@ services:
       - "3000:3000"
     volumes:
       - grafana_data:/var/lib/grafana
+      - grafana_plugins:/var/lib/grafana/plugins
       - ./grafana/provisioning:/etc/grafana/provisioning
 
   loki:
@@ -38,7 +41,7 @@ services:
     command: -config.file=/etc/loki/config.yml
     volumes:
       - ./loki/config.yml:/etc/loki/config.yml
-      - loki_data:/loki
+      - ./loki_data:/loki
     ports:
       - "3100:3100"
 
@@ -83,7 +86,18 @@ services:
     depends_on:
       - zabbix-server
 
+  zabbix-agent:
+    image: zabbix/zabbix-agent:alpine-6.4-latest
+    environment:
+      ZBX_SERVER_HOST: zabbix-server
+      ZBX_HOSTNAME: docker-agent
+    ports:
+      - "10050:10050"
+    depends_on:
+      - zabbix-server
+
 volumes:
   prometheus_data:
   grafana_data:
+  grafana_plugins:
   loki_data:

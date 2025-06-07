@@ -1,0 +1,8 @@
+# Dockerfile.grafana
+FROM grafana/grafana-oss:latest
+
+# Instala o plugin do Zabbix
+RUN grafana-cli plugins install alexanderzobnin-zabbix-app
+
+# Habilita o plugin (opcional, o Grafana normalmente ativa automaticamente)
+ENV GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS=alexanderzobnin-zabbix-app

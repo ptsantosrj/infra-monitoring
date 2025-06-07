@@ -1,116 +1,41 @@
 version: '3.8'
-
 services:
-  zabbix-server:
-    build:
-      context: ./zabbix/zabbix-server
-    container_name: zabbix-server
-    environment:
-      - DB_SERVER_HOST=zabbix-mysql
-      - MYSQL_DATABASE=zabbix
-      - MYSQL_USER=zabbix
-      - MYSQL_PASSWORD=secure_zabbix_password
-      - MYSQL_ROOT_PASSWORD=secure_mysql_root_password
-    depends_on:
-      - zabbix-mysql
-    volumes:
-      - ./zabbix/zabbix.conf:/etc/zabbix/zabbix_server.conf
-      - zabbix-data:/var/lib/zabbix
-    networks:
-      - monitoring-net
-    ports:
-      - "10051:10051"
-    restart: unless-stopped
-
-  zabbix-mysql:
-    image: mysql:8.0
-    container_name: zabbix-mysql
-    environment:
-      - MYSQL_ROOT_PASSWORD=secure_mysql_root_password
-      - MYSQL_DATABASE=zabbix
-      - MYSQL_USER=zabbix
-      - MYSQL_PASSWORD=secure_zabbix_password
-    volumes:
-      - zabbix-data:/var/lib/mysql
-    networks:
-      - monitoring-net
-    restart: unless-stopped
-
-  zabbix-agent:
-    build:
-      context: ./zabbix/zabbix-agent
-    container_name: zabbix-agent
-    environment:
-      - ZBX_SERVER_HOST=zabbix-server
-    depends_on:
-      - zabbix-server
-    networks:
-      - monitoring-net
-    restart: unless-stopped
-
   prometheus:
-    image: prom/prometheus:latest
-    container_name: prometheus
+    image: prom/prometheus
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
-      - ./prometheus/alert.rules.yml:/etc/prometheus/alert.rules.yml
-      - prometheus-data:/prometheus
+      - prometheus_data:/prometheus
     ports:
       - "9090:9090"
-    networks:
-      - monitoring-net
-    restart: unless-stopped
 
   grafana:
-    image: grafana/grafana:latest
-    container_name: grafana
+    image: grafana/grafana-oss
     environment:
       - GF_SECURITY_ADMIN_USER=admin
-      - GF_SECURITY_ADMIN_PASSWORD=secure_grafana_password
-      - GF_AUTH_ANONYMOUS_ENABLED=false
-    volumes:
-      - ./grafana/grafana.ini:/etc/grafana/grafana.ini
-      - ./grafana/provisioning:/etc/grafana/provisioning
-      - grafana-data:/var/lib/grafana
+      - GF_SECURITY_ADMIN_PASSWORD=admin_pass
     ports:
       - "3000:3000"
-    depends_on:
-      - prometheus
-      - loki
-    networks:
-      - monitoring-net
-    restart: unless-stopped
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
 
   loki:
-    image: grafana/loki:latest
-    container_name: loki
+    image: grafana/loki:2.9.3
+    command: -config.file=/etc/loki/config.yml
     volumes:
-      - ./loki/loki-config.yml:/etc/loki/loki-config.yml
-      - loki-data:/loki
+      - ./loki/config.yml:/etc/loki/config.yml
+      - loki_data:/loki
     ports:
       - "3100:3100"
-    networks:
-      - monitoring-net
-    restart: unless-stopped
 
   promtail:
-    image: grafana/promtail:latest
-    container_name: promtail
+    image: grafana/promtail:2.9.3
     volumes:
+      - ./promtail/config.yml:/etc/promtail/config.yml
       - /var/log:/var/log
-      - ./loki/loki-config.yml:/etc/promtail/config.yml
-    depends_on:
-      - loki
-    networks:
-      - monitoring-net
-    restart: unless-stopped
-
-networks:
-  monitoring-net:
-    driver: bridge
+    command: -config.file=/etc/promtail/config.yml
 
 volumes:
-  zabbix-data:
-  prometheus-data:
-  grafana-data:
-  loki-data:
+  prometheus_data:
+  grafana_data:
+  loki_data:

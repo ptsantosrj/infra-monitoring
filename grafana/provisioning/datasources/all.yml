@@ -1,4 +1,3 @@
-
 apiVersion: 1
 
 datasources:
@@ -12,9 +11,3 @@ datasources:
     type: loki
     access: proxy
     url: http://loki:3100
-
-  - name: Zabbix
-    type: alexanderzobnin-zabbix-datasource
-    url: http://zabbix-web:8080
-    access: proxy
-    basicAuth: false

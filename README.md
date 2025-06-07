@@ -41,6 +41,9 @@ cp .env.example .env
 
 *Suba a stack:
 docker-compose up -d
+
+* Ip dos containers
+docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' nome_ou_id_do_container
 ```
 ---
 

@@ -4,9 +4,23 @@ services:
     image: prom/prometheus
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus/alert.rules.yml:/etc/prometheus/alert.rules.yml
       - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--web.enable-lifecycle'
+      - '--storage.tsdb.retention.time=15d'
+      - '--web.external-url='
+      - '--web.route-prefix=/'
     ports:
       - "9090:9090"
+
+  alertmanager:
+    image: prom/alertmanager
+    volumes:
+      - ./prometheus/alertmanager.yml:/etc/alertmanager/alertmanager.yml
+    ports:
+      - "9093:9093"
 
   grafana:
     image: grafana/grafana-oss
@@ -34,6 +48,40 @@ services:
       - ./promtail/config.yml:/etc/promtail/config.yml
       - /var/log:/var/log
     command: -config.file=/etc/promtail/config.yml
+
+  node-exporter:
+    image: prom/node-exporter
+    ports:
+      - "9100:9100"
+
+  blackbox-exporter:
+    image: prom/blackbox-exporter
+    ports:
+      - "9115:9115"
+
+  zabbix-server:
+    image: zabbix/zabbix-server-mysql:alpine-6.4-latest
+    environment:
+      DB_SERVER_HOST: ${ZBX_DB_HOST}
+      MYSQL_USER: ${ZBX_DB_USER}
+      MYSQL_PASSWORD: ${ZBX_DB_PASSWORD}
+      MYSQL_DATABASE: ${ZBX_DB_NAME}
+    ports:
+      - "10051:10051"
+
+  zabbix-web:
+    image: zabbix/zabbix-web-nginx-mysql:alpine-6.4-latest
+    environment:
+      DB_SERVER_HOST: ${ZBX_DB_HOST}
+      MYSQL_USER: ${ZBX_DB_USER}
+      MYSQL_PASSWORD: ${ZBX_DB_PASSWORD}
+      MYSQL_DATABASE: ${ZBX_DB_NAME}
+      ZBX_SERVER_HOST: zabbix-server
+      PHP_TZ: America/Sao_Paulo
+    ports:
+      - "8080:8080"
+    depends_on:
+      - zabbix-server
 
 volumes:
   prometheus_data:

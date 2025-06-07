@@ -1,0 +1,11 @@
+groups:
+  - name: example
+    rules:
+      - alert: HighCPUUsage
+        expr: rate(node_cpu_seconds_total{mode="system"}[1m]) > 0.2
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Uso de CPU alto"
+          description: "Uso de CPU acima de 20% por mais de 2 minutos"

@@ -84,6 +84,10 @@ infra-monitoring/
 ## 📌 Notas
 
 - O plugin do Zabbix para Grafana precisa ser ativado via UI.
+  - docker exec -it nome_do_container_grafana /bin/bash
+  - grafana-cli plugins install alexanderzobnin-zabbix-app
+  - docker restart nome_do_container_grafana
+  
 - As configurações estão com foco em ambiente de **desenvolvimento**. Para produção, recomenda-se:
   - Configurações persistentes de volumes
   - TLS e autenticação
